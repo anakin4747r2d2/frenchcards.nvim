@@ -1,0 +1,48 @@
+describe(":French", function()
+    after_each(function()
+        local buf = vim.api.nvim_get_current_buf()
+        if vim.api.nvim_buf_is_valid(buf) then
+            vim.api.nvim_buf_delete(buf, { force = true })
+        end
+    end)
+
+    it("opens a scratch buffer", function()
+        vim.cmd("French")
+        assert.are.equal("nofile", vim.bo.buftype)
+    end)
+
+    it("displays a non-empty question", function()
+        vim.cmd("French")
+        assert.is_true(#vim.api.nvim_buf_get_lines(0, 1, 2, false)[1] > 0)
+    end)
+
+    it("places the cursor on the last line ready for input", function()
+        vim.cmd("French")
+        assert.are.equal(vim.api.nvim_buf_line_count(0), vim.api.nvim_win_get_cursor(0)[1])
+    end)
+
+    it("shows correct feedback when the right answer is entered", function()
+        vim.cmd("French")
+        local last = vim.api.nvim_buf_line_count(0)
+        vim.api.nvim_buf_set_lines(0, last - 1, last, false, { vim.b.frenchcards_answer })
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "x", false)
+        vim.wait(50)
+        assert.is_truthy(vim.api.nvim_exec2("messages", { output = true }).output:find("Correct"))
+    end)
+
+    it("shows incorrect feedback when the wrong answer is entered", function()
+        vim.cmd("French")
+        local last = vim.api.nvim_buf_line_count(0)
+        vim.api.nvim_buf_set_lines(0, last - 1, last, false, { "wrong answer" })
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "x", false)
+        vim.wait(50)
+        assert.is_truthy(vim.api.nvim_exec2("messages", { output = true }).output:find("Incorrect"))
+    end)
+
+    it("replaces the existing buffer when called again", function()
+        vim.cmd("French")
+        local first = vim.api.nvim_get_current_buf()
+        vim.cmd("French")
+        assert.is_false(vim.api.nvim_buf_is_valid(first))
+    end)
+end)
