@@ -332,6 +332,7 @@ function M.open_flashcard()
     vim.bo[buf].swapfile  = false
 
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, M.card_lines(M.current_card))
+    vim.b[buf].frenchcards_answer = M.current_card.a
 
     local line_count = vim.api.nvim_buf_line_count(buf)
     vim.api.nvim_win_set_cursor(0, { line_count, 0 })
