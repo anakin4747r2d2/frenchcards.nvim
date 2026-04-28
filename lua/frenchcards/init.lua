@@ -300,6 +300,7 @@ end
 -- ── Neovim UI (only wired up when running inside Neovim) ─────────────────────
 
 local buf = nil
+local win = nil
 M.current_card = nil
 
 local function check_answer()
@@ -320,14 +321,18 @@ local function show_answer()
 end
 
 function M.open_flashcard()
-    if buf and vim.api.nvim_buf_is_valid(buf) then
-        vim.api.nvim_buf_delete(buf, { force = true })
-    end
-
     M.current_card = M.pick_card()
 
-    vim.cmd("enew")
-    buf = vim.api.nvim_get_current_buf()
+    if win and vim.api.nvim_win_is_valid(win) then
+        -- Reuse the existing window: create a fresh buffer and swap it in
+        buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_win_set_buf(win, buf)
+    else
+        -- No flashcard window yet — open a new buffer in the current window
+        vim.cmd("enew")
+        buf = vim.api.nvim_get_current_buf()
+        win = vim.api.nvim_get_current_win()
+    end
 
     vim.bo[buf].buftype  = "nofile"
     vim.bo[buf].bufhidden = "wipe"
