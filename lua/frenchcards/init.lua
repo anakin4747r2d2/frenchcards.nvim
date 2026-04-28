@@ -1,5 +1,7 @@
 local M = {}
 
+math.randomseed(os.time())
+
 M.cards = {
     { q = "I will speak to him", a = "Je lui parlerai" },
     { q = "They do not have", a = "Ils n'ont pas", meta = "masc" },
